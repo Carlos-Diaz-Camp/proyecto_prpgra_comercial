@@ -1,0 +1,25 @@
+databases:
+  - name: criterio-db
+    plan: free
+    databaseName: criterio
+    user: criterio
+
+services:
+  - type: web
+    name: criterio
+    runtime: docker
+    plan: free
+    branch: main
+    autoDeployTrigger: checksPass
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: criterio-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ENVIRONMENT
+        value: production
+      - key: GROQ_API_KEY
+        sync: false
