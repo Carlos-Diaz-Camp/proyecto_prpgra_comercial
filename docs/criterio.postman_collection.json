@@ -1,0 +1,1547 @@
+{
+  "info": {
+    "name": "Criterio · Pruebas de API",
+    "description": "Ejecuta una carpeta con Collection Runner. QA local utiliza una base desechable y cuentas de prueba. Integración Groq requiere GROQ_API_KEY en el servidor y una cuenta con cupo. Los JWT existen solo durante la ejecución.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "email",
+      "value": ""
+    },
+    {
+      "key": "password",
+      "value": ""
+    },
+    {
+      "key": "qaAdminEmail",
+      "value": ""
+    },
+    {
+      "key": "qaAdminPassword",
+      "value": ""
+    },
+    {
+      "key": "qaUserEmail",
+      "value": ""
+    },
+    {
+      "key": "qaUserPassword",
+      "value": ""
+    },
+    {
+      "key": "qaQuotaEmail",
+      "value": ""
+    },
+    {
+      "key": "qaQuotaPassword",
+      "value": ""
+    },
+    {
+      "key": "qaReporterEmail",
+      "value": ""
+    },
+    {
+      "key": "qaReporterPassword",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "QA local · permisos, CRUD, cuota y reportes",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "(() => {",
+              "if (!/^http:\\/\\/(127\\.0\\.0\\.1|localhost):\\d+$/.test(pm.variables.get(\"baseUrl\"))) { throw new Error(\"Usa únicamente una API local de QA.\"); }",
+              "})();"
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "name": "Estado del servicio",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}/api/health",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"PostgreSQL responde\", () => pm.expect(pm.response.json().status).to.equal(\"ok\"));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "La API exige credenciales",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}/api/consumo",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rechazar contraseña inválida",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"no-existe@criterio.test\",\n  \"password\": \"contraseña-incorrecta-de-qa\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Entrar como administrador",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{{loginBody}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.variables.set(\"loginBody\", JSON.stringify({ email: pm.variables.get(\"qaAdminEmail\"), password: pm.variables.get(\"qaAdminPassword\") }));",
+                  "})();"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.test(\"JWT y perfil devueltos\", () => { pm.expect(data.access_token).to.be.a(\"string\"); pm.expect(data.user.id).to.be.a(\"string\"); });",
+                  "if (pm.response.code === 200) { pm.variables.set(\"qaAdminJwt\", data.access_token); pm.variables.set(\"qaAdminId\", data.user.id); }",
+                  "const cookies = pm.response.headers.all().filter(h => h.key.toLowerCase() === \"set-cookie\").map(h => h.value);",
+                  "const csrf = cookies.find(value => value.startsWith(\"csrf_token=\"));",
+                  "pm.test(\"Cookie de renovación HttpOnly y CSRF emitidos\", () => { pm.expect(csrf).to.be.a(\"string\"); pm.expect(cookies.some(value => value.startsWith(\"refresh_token=\") && /httponly/i.test(value))).to.equal(true); });",
+                  "if (csrf) pm.variables.set(\"qaCsrf\", csrf.split(\";\")[0].slice(\"csrf_token=\".length));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rechazar renovación sin CSRF",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}/api/auth/refresh",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Renovar la sesión con CSRF",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}/api/auth/refresh",
+            "header": [
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{qaCsrf}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.test(\"La renovación conserva el usuario\", () => { pm.expect(data.user.id).to.equal(pm.variables.get(\"qaAdminId\")); pm.expect(data.access_token).to.be.a(\"string\"); });",
+                  "if (pm.response.code === 200) pm.variables.set(\"qaAdminJwt\", data.access_token);",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar los tres servicios",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{qaAdminJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/servicios",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Chat, exploración y alternativas activos\", () => pm.expect(pm.response.json().items.filter(s => s.enabled).map(s => s.slug)).to.include.members([\"chat\", \"explorar\", \"alternativas\"]));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear producto desechable",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{qaAdminJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/admin/productos",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Producto desechable de QA\",\n  \"brand\": \"Criterio QA\",\n  \"category\": \"pruebas\",\n  \"description\": \"Registro creado y eliminado por las pruebas locales.\",\n  \"price\": 15,\n  \"currency\": \"USD\",\n  \"is_demo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "const item = pm.response.json(); if (pm.response.code === 201) pm.variables.set(\"qaProduct\", item.id);",
+                  "pm.test(\"Producto de demostración creado\", () => pm.expect(item.is_demo).to.equal(true));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar producto desechable",
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{qaAdminJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/admin/productos/{{qaProduct}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Producto desechable de QA\",\n  \"brand\": \"Criterio QA\",\n  \"category\": \"pruebas\",\n  \"description\": \"Registro creado y eliminado por las pruebas locales.\",\n  \"price\": 27,\n  \"currency\": \"USD\",\n  \"is_demo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Precio actualizado\", () => pm.expect(pm.response.json().price).to.equal(27));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear reseña del producto",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{qaAdminJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/admin/resenas",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{{qaReviewBody}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.variables.set(\"qaReviewBody\", JSON.stringify({product_id: Number(pm.variables.get(\"qaProduct\")), rating: 4, comment: \"Reseña sintética para la colección Postman.\"}));",
+                  "})();"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Reseña asociada al producto\", () => pm.expect(pm.response.json().product_id).to.equal(Number(pm.variables.get(\"qaProduct\"))));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar reseñas del producto",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{qaAdminJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/productos/{{qaProduct}}/resenas",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Se recupera la reseña de QA\", () => pm.expect(pm.response.json().some(r => r.rating === 4)).to.equal(true));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar únicamente el producto de QA",
+          "request": {
+            "method": "DELETE",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{qaAdminJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/admin/productos/{{qaProduct}}",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Entrar como usuario normal",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{{loginBody}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.variables.set(\"loginBody\", JSON.stringify({ email: pm.variables.get(\"qaUserEmail\"), password: pm.variables.get(\"qaUserPassword\") }));",
+                  "})();"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.test(\"JWT y perfil devueltos\", () => { pm.expect(data.access_token).to.be.a(\"string\"); pm.expect(data.user.id).to.be.a(\"string\"); });",
+                  "if (pm.response.code === 200) { pm.variables.set(\"qaUserJwt\", data.access_token); pm.variables.set(\"qaUserId\", data.user.id); }",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Restringir la administración a su rol",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{qaUserJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/admin/usuarios",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "RAG sin evidencia",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{qaUserJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/ia/chat",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"zxqxyzrobotmodelo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Informa falta de evidencia y no cobra tokens\", () => { pm.expect(data.answer).to.include(\"información suficiente\"); pm.expect(data.sources).to.have.length(0); pm.expect(data.usage.total_tokens).to.equal(0); });",
+                  "if (pm.response.code === 200) pm.variables.set(\"qaConversation\", data.conversation_id);",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar conversación propia",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{qaUserJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/conversaciones/{{qaConversation}}",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"El historial conserva pregunta y respuesta\", () => pm.expect(pm.response.json().messages.map(m => m.role)).to.eql([\"user\", \"assistant\"]));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Proteger el reporte de otro usuario",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{qaUserJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/reportes/uso?usuario={{qaAdminId}}",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Entrar con cupo cero",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{{loginBody}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.variables.set(\"loginBody\", JSON.stringify({ email: pm.variables.get(\"qaQuotaEmail\"), password: pm.variables.get(\"qaQuotaPassword\") }));",
+                  "})();"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.test(\"JWT y perfil devueltos\", () => { pm.expect(data.access_token).to.be.a(\"string\"); pm.expect(data.user.id).to.be.a(\"string\"); });",
+                  "if (pm.response.code === 200) { pm.variables.set(\"qaQuotaJwt\", data.access_token); pm.variables.set(\"qaQuotaId\", data.user.id); }",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bloquear IA al agotar cupo",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{qaQuotaJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/ia/chat",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"¿Cómo es la batería?\",\n  \"product_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 429\", () => pm.response.to.have.status(429));",
+                  "pm.test(\"El bloqueo se atribuye al cupo de tokens\", () => pm.expect(pm.response.json().detail.message).to.include(\"límite de tokens\"));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Proteger conversaciones de otro usuario",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{qaQuotaJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/conversaciones/{{qaConversation}}",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar saldo de la cuenta bloqueada",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{qaQuotaJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/consumo",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Sin tokens cobrados ni disponibles\", () => { const data = pm.response.json(); pm.expect(data.tokens_used).to.equal(0); pm.expect(data.available).to.equal(0); });",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reporte web con JWT",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{qaAdminJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/reportes/uso?servicio=chat",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Incluye el bloqueo y solo el servicio seleccionado\", () => { pm.expect(data.totals.bloqueadas).to.be.above(0); pm.expect(data.rows.every(r => r.servicio === \"chat\")).to.equal(true); });",
+                  "pm.variables.set(\"qaReportSnapshot\", JSON.stringify({ rows: data.rows, totals: data.totals }));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reporte Power BI con HTTP Basic",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{qaReporterEmail}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{qaReporterPassword}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/reportes/uso?servicio=chat",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Filas y totales coinciden con el reporte web\", () => { const data = pm.response.json(); pm.expect({ rows: data.rows, totals: data.totals }).to.deep.equal(JSON.parse(pm.variables.get(\"qaReportSnapshot\"))); });",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cuenta Power BI sin acceso administrativo",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{qaReporterEmail}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{qaReporterPassword}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/admin/usuarios",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cerrar sesión de usuario normal",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{qaUserJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/auth/logout",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rechazar JWT revocado",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{qaUserJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/consumo",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cerrar sesión con cupo cero",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{qaQuotaJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/auth/logout",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cerrar sesión administrativa",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{qaAdminJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/auth/logout",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Integración real · Groq y DummyJSON",
+      "item": [
+        {
+          "name": "Entrar para la demostración",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{{loginBody}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.variables.set(\"loginBody\", JSON.stringify({ email: pm.variables.get(\"email\"), password: pm.variables.get(\"password\") }));",
+                  "})();"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.test(\"JWT y perfil devueltos\", () => { pm.expect(data.access_token).to.be.a(\"string\"); pm.expect(data.user.id).to.be.a(\"string\"); });",
+                  "if (pm.response.code === 200) { pm.variables.set(\"liveJwt\", data.access_token); pm.variables.set(\"liveUserId\", data.user.id); }",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar el consumo inicial",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{liveJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/consumo",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json(); pm.variables.set(\"liveStartingUsage\", data.tokens_used); pm.variables.set(\"liveUsage\", 0);",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Chat RAG con evidencia de PostgreSQL",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{liveJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/ia/chat",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"¿Qué dicen las reseñas sobre la batería del iPhone 13?\",\n  \"product_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Respuesta con fuentes y consumo real\", () => { pm.expect(data.answer.trim()).not.to.be.empty; pm.expect(data.sources).not.to.be.empty; pm.expect(data.usage.total_tokens).to.be.above(0); pm.expect(data.usage.total_tokens).to.equal(data.usage.input_tokens + data.usage.output_tokens); });",
+                  "if (pm.response.code === 200) pm.variables.set(\"liveUsage\", Number(pm.variables.get(\"liveUsage\") || 0) + data.usage.total_tokens);",
+                  "pm.test(\"Cita el catálogo de PostgreSQL\", () => pm.expect(data.sources.some(s => s.id.startsWith(\"reseña:\"))).to.equal(true));",
+                  "if (pm.response.code === 200) pm.variables.set(\"liveConversation\", data.conversation_id);",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Continuar la misma conversación",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{liveJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/ia/chat",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"¿Y sobre la cámara?\",\n  \"conversation_id\": \"{{liveConversation}}\",\n  \"product_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Respuesta con fuentes y consumo real\", () => { pm.expect(data.answer.trim()).not.to.be.empty; pm.expect(data.sources).not.to.be.empty; pm.expect(data.usage.total_tokens).to.be.above(0); pm.expect(data.usage.total_tokens).to.equal(data.usage.input_tokens + data.usage.output_tokens); });",
+                  "if (pm.response.code === 200) pm.variables.set(\"liveUsage\", Number(pm.variables.get(\"liveUsage\") || 0) + data.usage.total_tokens);",
+                  "pm.test(\"Continúa en la misma conversación\", () => pm.expect(data.conversation_id).to.equal(pm.variables.get(\"liveConversation\")));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Explorar reseñas externas",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{liveJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/ia/explorar",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"Busca reseñas externas de iPhone 13 o de otros smartphones y resume sus aspectos positivos y negativos.\",\n  \"product_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Respuesta con fuentes y consumo real\", () => { pm.expect(data.answer.trim()).not.to.be.empty; pm.expect(data.sources).not.to.be.empty; pm.expect(data.usage.total_tokens).to.be.above(0); pm.expect(data.usage.total_tokens).to.equal(data.usage.input_tokens + data.usage.output_tokens); });",
+                  "if (pm.response.code === 200) pm.variables.set(\"liveUsage\", Number(pm.variables.get(\"liveUsage\") || 0) + data.usage.total_tokens);",
+                  "pm.test(\"Consulta externa en un flujo de varios pasos\", () => { pm.expect(data.trace.length).to.be.at.least(2); pm.expect(data.sources.some(s => s.url && s.url.startsWith(\"https://dummyjson.com/\"))).to.equal(true); });",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Comparar alternativas externas",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{liveJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/ia/alternativas",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"Identifica un problema recurrente del iPhone 13 y compara dos smartphones que encuentres en la fuente externa.\",\n  \"product_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Respuesta con fuentes y consumo real\", () => { pm.expect(data.answer.trim()).not.to.be.empty; pm.expect(data.sources).not.to.be.empty; pm.expect(data.usage.total_tokens).to.be.above(0); pm.expect(data.usage.total_tokens).to.equal(data.usage.input_tokens + data.usage.output_tokens); });",
+                  "if (pm.response.code === 200) pm.variables.set(\"liveUsage\", Number(pm.variables.get(\"liveUsage\") || 0) + data.usage.total_tokens);",
+                  "pm.test(\"Consulta externa en un flujo de varios pasos\", () => { pm.expect(data.trace.length).to.be.at.least(2); pm.expect(data.sources.some(s => s.url && s.url.startsWith(\"https://dummyjson.com/\"))).to.equal(true); });",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Comprobar memoria guardada",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{liveJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/conversaciones/{{liveConversation}}",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Se guardan los dos turnos\", () => pm.expect(pm.response.json().messages.map(m => m.role)).to.eql([\"user\", \"assistant\", \"user\", \"assistant\"]));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Conciliar consumo de las llamadas",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{liveJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/consumo",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Saldo consumido coincide con los cuatro llamados al API\", () => pm.expect(pm.response.json().tokens_used - Number(pm.variables.get(\"liveStartingUsage\"))).to.equal(Number(pm.variables.get(\"liveUsage\"))));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar reporte del usuario de demostración",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{liveJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/reportes/uso?usuario={{liveUserId}}",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"El reporte incluye las llamadas con sus tokens\", () => { const data = pm.response.json(); pm.expect(data.totals.completadas).to.be.at.least(4); pm.expect(data.totals.tokens_total).to.be.at.least(Number(pm.variables.get(\"liveUsage\"))); });",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cerrar sesión de demostración",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{liveJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/auth/logout",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rechazar JWT revocado",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{liveJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/consumo",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "(() => {",
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+                  "})();"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
