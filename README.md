@@ -2,12 +2,20 @@
 
 Aplicación académica de opiniones de productos. React muestra el catálogo, tres asistentes, el historial, el consumo y el panel administrativo. FastAPI controla permisos, consulta PostgreSQL y coordina Groq y DummyJSON.
 
+## Publicación
+
+- Aplicación: https://criterio-7s6r.onrender.com
+- Swagger: https://criterio-7s6r.onrender.com/docs
+- Estado: https://criterio-7s6r.onrender.com/api/health
+- Repositorio: https://github.com/Carlos-Diaz-Camp/proyecto_prpgra_comercial
+- CI: https://github.com/Carlos-Diaz-Camp/proyecto_prpgra_comercial/actions
+
 | Recurso | Qué contiene |
 | --- | --- |
 | [Guía de publicación](docs/DESPLIEGUE.md) | Pasos para GitHub, Render, PostgreSQL y Groq |
 | [Propuesta técnica](docs/PROYECTO.md) | Alcance, arquitectura, modelo de datos y guion para la demostración |
 | [Script SQL](database/setup.sql) | Esquema PostgreSQL, 12 productos, 96 reseñas sintéticas y los tres servicios |
-| [Pruebas con Postman](docs/postman/README.md) | Colección importable, entorno de QA y resultados de la ejecución local |
+| [Pruebas con Postman](docs/postman/README.md) | Colección importable y resultados locales y publicados |
 | [Power BI](docs/powerbi/README.md) | Consulta Power Query, medidas DAX y pasos para guardar el `.pbix` |
 
 ## Ejecutar en Windows

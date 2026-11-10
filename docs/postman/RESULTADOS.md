@@ -47,3 +47,22 @@ Newman ejecutó las **11 solicitudes y 23 comprobaciones** de la carpeta de inte
 | Comparar alternativas externas | 200 | 2 | 4 | 4399 |
 
 La diferencia de consumo fue de **10 191 tokens**, igual a la suma devuelta por las cuatro solicitudes. También se verificaron la memoria de los dos turnos, el reporte y la revocación del JWT. El archivo PBIX se verificará contra la API publicada después de inicializar PostgreSQL en Render.
+
+## Ejecución publicada en Render
+
+El 10 de noviembre de 2026 se repitió la carpeta **Integración real · Groq y DummyJSON** contra `https://criterio-7s6r.onrender.com`, con PostgreSQL de Render y el despliegue del commit `6ccdfa8` posterior a los checks de CI. Newman ejecutó **11 solicitudes, 11 scripts de prueba y 23 comprobaciones**, con **0 fallos**.
+
+| Comprobación publicada | Resultado |
+| --- | ---: |
+| Aplicación React | HTTP 200 |
+| Salud de FastAPI y PostgreSQL | HTTP 200 |
+| Swagger | HTTP 200 |
+| Login y renovación JWT con origen HTTPS | HTTP 200 |
+| RAG y continuación con memoria | HTTP 200 |
+| Agente de exploración con dos pasos externos | HTTP 200 |
+| Agente de alternativas con dos pasos externos | HTTP 200 |
+| Historial persistido | HTTP 200 |
+| Consumo y reporte conciliados | HTTP 200 |
+| JWT rechazado después del cierre de sesión | HTTP 401 esperado |
+
+La ejecución aplicó una pausa de 40 segundos entre solicitudes para respetar el límite gratuito por minuto de Groq. Un rechazo temporal previo permitió verificar además que la API devuelve `503` con un mensaje explícito y no pierde la contabilidad. Los reportes crudos de Newman se conservaron únicamente durante la comprobación y se eliminaron porque contenían JWT de la sesión.

@@ -4,6 +4,8 @@
 
 Criterio ayuda a explorar opiniones de productos, identificar problemas recurrentes y comparar alternativas con evidencia identificable. El usuario consulta el catálogo, sus conversaciones y su saldo. El administrador gestiona cuentas, productos, reseñas, modelos, activación de servicios y cupos. Una cuenta de Power BI puede leer únicamente el reporte de uso.
 
+La entrega publicada está disponible en [Criterio](https://criterio-7s6r.onrender.com), con [Swagger](https://criterio-7s6r.onrender.com/docs), [estado de salud](https://criterio-7s6r.onrender.com/api/health) y [repositorio público](https://github.com/Carlos-Diaz-Camp/proyecto_prpgra_comercial).
+
 El catálogo de demostración contiene 12 productos y 96 reseñas sintéticas. Las dos herramientas de búsqueda externa usan [DummyJSON](https://dummyjson.com/docs/products), un catálogo público de prueba. Las referencias externas llevan su URL y los resultados identifican los datos de demostración.
 
 ## Arquitectura
