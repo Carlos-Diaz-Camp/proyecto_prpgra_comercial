@@ -65,6 +65,22 @@ def test_no_evidence_does_not_invent_or_call_provider(client, monkeypatch):
     assert result.json()['usage']['total_tokens'] == 0
 
 
+def test_groq_retries_once_after_short_rate_limit(monkeypatch):
+    responses = iter([
+        httpx.Response(429, headers={'Retry-After': '2'}),
+        httpx.Response(200, json=completion()),
+    ])
+    provider = httpx.Client(transport=httpx.MockTransport(lambda _: next(responses)))
+    delays = []
+    monkeypatch.setattr(ai.httpx, 'Client', lambda **_: provider)
+    monkeypatch.setattr(ai.time, 'sleep', delays.append)
+
+    result = ai.groq_call([{'role': 'user', 'content': 'Hola'}], 'openai/gpt-oss-20b', 100)
+
+    assert delays == [2.2]
+    assert result['usage']['total_tokens'] == 120
+
+
 @pytest.mark.parametrize(('slug', 'empty_search'), [('explorar', False), ('alternativas', False), ('explorar', True)])
 def test_agents_use_external_tools_multiple_steps_and_meter_all_calls(client, monkeypatch, slug, empty_search):
     responses = iter([completion(None, [tool('buscar_externos', {'consulta': 'phone'})]), completion(None, [tool('detalle_externo', {'producto_id': 1}, 'call-2')]), completion('Opiniones de ejemplo [externo:1].')])

@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+import time
 from datetime import datetime, timezone
 import httpx
 from fastapi import HTTPException
@@ -104,8 +105,19 @@ def groq_call(messages, model, max_tokens, tools=None, required=False):
         body['reasoning_effort'] = 'low'
     if tools:
         body.update(tools=tools, tool_choice='required' if required else 'auto', parallel_tool_calls=False)
+    url = 'https://api.groq.com/openai/v1/chat/completions'
+    headers = {'Authorization': f'Bearer {settings().groq_api_key}'}
     with httpx.Client(timeout=35) as client:
-        response = client.post('https://api.groq.com/openai/v1/chat/completions', headers={'Authorization': f'Bearer {settings().groq_api_key}'}, json=body)
+        response = client.post(url, headers=headers, json=body)
+        if response.status_code == 429:
+            # A rejected request did not complete inference. Keep its local reservation while retrying once.
+            try:
+                seconds = float(response.headers.get('Retry-After', 'inf'))
+            except ValueError:
+                seconds = float('inf')
+            if 0 <= seconds <= 7:
+                time.sleep(seconds + 0.2)
+                response = client.post(url, headers=headers, json=body)
         response.raise_for_status()
         return response.json()
 

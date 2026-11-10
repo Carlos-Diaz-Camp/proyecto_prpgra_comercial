@@ -35,4 +35,15 @@ La carpeta **QA local · permisos, CRUD, cuota y reportes** se ejecutó contra F
 
 Los códigos 401, 403, 404 y 429 son resultados esperados de las pruebas de acceso, aislamiento y cupos. Esta evidencia contiene únicamente nombres, códigos HTTP y cantidades.
 
-La carpeta **Integración real · Groq y DummyJSON** queda pendiente hasta configurar GROQ_API_KEY. La coincidencia del endpoint de reportes con credenciales de Power BI ya se probó en local. El archivo PBIX debe conectarse y verificarse después del despliegue.
+## Integración real con Groq y DummyJSON
+
+Newman ejecutó las **11 solicitudes y 23 comprobaciones** de la carpeta de integración sin fallos. FastAPI usó PostgreSQL local, el modelo `openai/gpt-oss-20b` de Groq y la API pública de DummyJSON. La primera búsqueda por nombre puede quedar vacía, así que los agentes consultan la categoría del catálogo cuando corresponde y atribuyen las reseñas a los productos encontrados.
+
+| Consulta | HTTP | Pasos registrados | Fuentes externas | Tokens confirmados |
+| --- | ---: | ---: | ---: | ---: |
+| Chat RAG con evidencia de PostgreSQL | 200 | 1 | 0 | 800 |
+| Continuación de la conversación | 200 | 1 | 0 | 921 |
+| Explorar reseñas externas | 200 | 2 | 4 | 4071 |
+| Comparar alternativas externas | 200 | 2 | 4 | 4399 |
+
+La diferencia de consumo fue de **10 191 tokens**, igual a la suma devuelta por las cuatro solicitudes. También se verificaron la memoria de los dos turnos, el reporte y la revocación del JWT. El archivo PBIX se verificará contra la API publicada después de inicializar PostgreSQL en Render.
