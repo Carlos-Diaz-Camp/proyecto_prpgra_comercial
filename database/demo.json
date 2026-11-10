@@ -1,0 +1,938 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "iPhone 13",
+      "brand": "Apple",
+      "category": "smartphones",
+      "description": "Teléfono con pantalla OLED, cámara dual y almacenamiento de 128 GB.",
+      "price": 599,
+      "currency": "USD",
+      "external_id": null,
+      "is_demo": true
+    },
+    {
+      "id": 2,
+      "name": "Samsung Galaxy S23",
+      "brand": "Samsung",
+      "category": "smartphones",
+      "description": "Teléfono Android compacto con pantalla AMOLED y cámara versátil.",
+      "price": 649,
+      "currency": "USD",
+      "external_id": null,
+      "is_demo": true
+    },
+    {
+      "id": 3,
+      "name": "Google Pixel 7",
+      "brand": "Google",
+      "category": "smartphones",
+      "description": "Teléfono Android con cámara principal de 50 MP y pantalla OLED.",
+      "price": 449,
+      "currency": "USD",
+      "external_id": null,
+      "is_demo": true
+    },
+    {
+      "id": 4,
+      "name": "MacBook Air M2",
+      "brand": "Apple",
+      "category": "laptops",
+      "description": "Portátil ligero para estudio y trabajo, con 8 GB de memoria y 256 GB de almacenamiento.",
+      "price": 999,
+      "currency": "USD",
+      "external_id": null,
+      "is_demo": true
+    },
+    {
+      "id": 5,
+      "name": "Lenovo IdeaPad 5",
+      "brand": "Lenovo",
+      "category": "laptops",
+      "description": "Portátil de trabajo con pantalla de 15 pulgadas y 16 GB de memoria.",
+      "price": 699,
+      "currency": "USD",
+      "external_id": null,
+      "is_demo": true
+    },
+    {
+      "id": 6,
+      "name": "Dell XPS 13",
+      "brand": "Dell",
+      "category": "laptops",
+      "description": "Portátil compacto con pantalla de alta resolución, orientado a movilidad.",
+      "price": 1099,
+      "currency": "USD",
+      "external_id": null,
+      "is_demo": true
+    },
+    {
+      "id": 7,
+      "name": "Sony WH-1000XM4",
+      "brand": "Sony",
+      "category": "mobile-accessories",
+      "description": "Audífonos inalámbricos con cancelación activa de ruido y micrófono.",
+      "price": 249,
+      "currency": "USD",
+      "external_id": null,
+      "is_demo": true
+    },
+    {
+      "id": 8,
+      "name": "Apple AirPods Max",
+      "brand": "Apple",
+      "category": "mobile-accessories",
+      "description": "Audífonos de diadema con cancelación de ruido e integración con dispositivos Apple.",
+      "price": 499,
+      "currency": "USD",
+      "external_id": null,
+      "is_demo": true
+    },
+    {
+      "id": 9,
+      "name": "Samsung Galaxy Buds 2",
+      "brand": "Samsung",
+      "category": "mobile-accessories",
+      "description": "Audífonos compactos con estuche de carga y cancelación de ruido.",
+      "price": 119,
+      "currency": "USD",
+      "external_id": null,
+      "is_demo": true
+    },
+    {
+      "id": 10,
+      "name": "iPad Air",
+      "brand": "Apple",
+      "category": "tablets",
+      "description": "Tableta ligera para lectura, notas y contenido multimedia.",
+      "price": 549,
+      "currency": "USD",
+      "external_id": null,
+      "is_demo": true
+    },
+    {
+      "id": 11,
+      "name": "Samsung Galaxy Tab S8",
+      "brand": "Samsung",
+      "category": "tablets",
+      "description": "Tableta Android con soporte para lápiz y multitarea.",
+      "price": 599,
+      "currency": "USD",
+      "external_id": null,
+      "is_demo": true
+    },
+    {
+      "id": 12,
+      "name": "Lenovo Tab P11",
+      "brand": "Lenovo",
+      "category": "tablets",
+      "description": "Tableta de 11 pulgadas para estudio, lectura y entretenimiento.",
+      "price": 249,
+      "currency": "USD",
+      "external_id": null,
+      "is_demo": true
+    }
+  ],
+  "reviews": [
+    {
+      "id": 1,
+      "product_id": 1,
+      "rating": 5,
+      "comment": "La cámara toma fotos claras de día y el teléfono responde rápido.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 2,
+      "product_id": 1,
+      "rating": 2,
+      "comment": "La batería se agota antes de terminar el día con uso intenso.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 3,
+      "product_id": 1,
+      "rating": 2,
+      "comment": "La batería dura poco cuando uso mapas y videollamadas.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 4,
+      "product_id": 1,
+      "rating": 4,
+      "comment": "La pantalla se ve bien al aire libre y el tamaño es cómodo.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 5,
+      "product_id": 1,
+      "rating": 3,
+      "comment": "Se calienta al jugar durante mucho tiempo.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 6,
+      "product_id": 1,
+      "rating": 5,
+      "comment": "La cámara me resulta útil para tareas y documentos.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 7,
+      "product_id": 1,
+      "rating": 3,
+      "comment": "El precio me parece alto para el almacenamiento incluido.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 8,
+      "product_id": 1,
+      "rating": 4,
+      "comment": "La batería es suficiente para llamadas y mensajes, con uso moderado.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 9,
+      "product_id": 2,
+      "rating": 5,
+      "comment": "La cámara toma fotos claras de día y el teléfono responde rápido.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 10,
+      "product_id": 2,
+      "rating": 2,
+      "comment": "La batería se agota antes de terminar el día con uso intenso.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 11,
+      "product_id": 2,
+      "rating": 2,
+      "comment": "La batería dura poco cuando uso mapas y videollamadas.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 12,
+      "product_id": 2,
+      "rating": 4,
+      "comment": "La pantalla se ve bien al aire libre y el tamaño es cómodo.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 13,
+      "product_id": 2,
+      "rating": 3,
+      "comment": "Se calienta al jugar durante mucho tiempo.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 14,
+      "product_id": 2,
+      "rating": 5,
+      "comment": "La cámara me resulta útil para tareas y documentos.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 15,
+      "product_id": 2,
+      "rating": 3,
+      "comment": "El precio me parece alto para el almacenamiento incluido.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 16,
+      "product_id": 2,
+      "rating": 4,
+      "comment": "La batería es suficiente para llamadas y mensajes, con uso moderado.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 17,
+      "product_id": 3,
+      "rating": 5,
+      "comment": "La cámara toma fotos claras de día y el teléfono responde rápido.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 18,
+      "product_id": 3,
+      "rating": 2,
+      "comment": "La batería se agota antes de terminar el día con uso intenso.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 19,
+      "product_id": 3,
+      "rating": 2,
+      "comment": "La batería dura poco cuando uso mapas y videollamadas.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 20,
+      "product_id": 3,
+      "rating": 4,
+      "comment": "La pantalla se ve bien al aire libre y el tamaño es cómodo.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 21,
+      "product_id": 3,
+      "rating": 3,
+      "comment": "Se calienta al jugar durante mucho tiempo.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 22,
+      "product_id": 3,
+      "rating": 5,
+      "comment": "La cámara me resulta útil para tareas y documentos.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 23,
+      "product_id": 3,
+      "rating": 3,
+      "comment": "El precio me parece alto para el almacenamiento incluido.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 24,
+      "product_id": 3,
+      "rating": 4,
+      "comment": "La batería es suficiente para llamadas y mensajes, con uso moderado.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 25,
+      "product_id": 4,
+      "rating": 5,
+      "comment": "Es ligero y fácil de llevar a clases.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 26,
+      "product_id": 4,
+      "rating": 2,
+      "comment": "Tiene pocos puertos y debo cargar un adaptador.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 27,
+      "product_id": 4,
+      "rating": 3,
+      "comment": "Me faltan puertos para conectar mis periféricos.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 28,
+      "product_id": 4,
+      "rating": 5,
+      "comment": "Funciona bien con documentos y videollamadas.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 29,
+      "product_id": 4,
+      "rating": 3,
+      "comment": "La pantalla tiene reflejos en una habitación iluminada.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 30,
+      "product_id": 4,
+      "rating": 4,
+      "comment": "El teclado es cómodo para escribir varias horas.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 31,
+      "product_id": 4,
+      "rating": 2,
+      "comment": "La memoria se queda corta con muchas aplicaciones abiertas.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 32,
+      "product_id": 4,
+      "rating": 4,
+      "comment": "La batería me permite trabajar durante la mañana.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 33,
+      "product_id": 5,
+      "rating": 5,
+      "comment": "Es ligero y fácil de llevar a clases.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 34,
+      "product_id": 5,
+      "rating": 2,
+      "comment": "Tiene pocos puertos y debo cargar un adaptador.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 35,
+      "product_id": 5,
+      "rating": 3,
+      "comment": "Me faltan puertos para conectar mis periféricos.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 36,
+      "product_id": 5,
+      "rating": 5,
+      "comment": "Funciona bien con documentos y videollamadas.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 37,
+      "product_id": 5,
+      "rating": 3,
+      "comment": "La pantalla tiene reflejos en una habitación iluminada.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 38,
+      "product_id": 5,
+      "rating": 4,
+      "comment": "El teclado es cómodo para escribir varias horas.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 39,
+      "product_id": 5,
+      "rating": 2,
+      "comment": "La memoria se queda corta con muchas aplicaciones abiertas.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 40,
+      "product_id": 5,
+      "rating": 4,
+      "comment": "La batería me permite trabajar durante la mañana.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 41,
+      "product_id": 6,
+      "rating": 5,
+      "comment": "Es ligero y fácil de llevar a clases.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 42,
+      "product_id": 6,
+      "rating": 2,
+      "comment": "Tiene pocos puertos y debo cargar un adaptador.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 43,
+      "product_id": 6,
+      "rating": 3,
+      "comment": "Me faltan puertos para conectar mis periféricos.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 44,
+      "product_id": 6,
+      "rating": 5,
+      "comment": "Funciona bien con documentos y videollamadas.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 45,
+      "product_id": 6,
+      "rating": 3,
+      "comment": "La pantalla tiene reflejos en una habitación iluminada.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 46,
+      "product_id": 6,
+      "rating": 4,
+      "comment": "El teclado es cómodo para escribir varias horas.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 47,
+      "product_id": 6,
+      "rating": 2,
+      "comment": "La memoria se queda corta con muchas aplicaciones abiertas.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 48,
+      "product_id": 6,
+      "rating": 4,
+      "comment": "La batería me permite trabajar durante la mañana.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 49,
+      "product_id": 7,
+      "rating": 5,
+      "comment": "La cancelación de ruido ayuda a concentrarme.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 50,
+      "product_id": 7,
+      "rating": 2,
+      "comment": "El micrófono recoge mucho ruido en la calle.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 51,
+      "product_id": 7,
+      "rating": 2,
+      "comment": "En llamadas exteriores no me escuchan con claridad.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 52,
+      "product_id": 7,
+      "rating": 4,
+      "comment": "Son cómodos durante sesiones cortas.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 53,
+      "product_id": 7,
+      "rating": 3,
+      "comment": "Después de varias horas noto presión y molestia.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 54,
+      "product_id": 7,
+      "rating": 5,
+      "comment": "La batería dura varios días con mi uso.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 55,
+      "product_id": 7,
+      "rating": 4,
+      "comment": "La conexión con mi teléfono es estable.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 56,
+      "product_id": 7,
+      "rating": 3,
+      "comment": "El sonido es claro, pero el precio es elevado.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 57,
+      "product_id": 8,
+      "rating": 5,
+      "comment": "La cancelación de ruido ayuda a concentrarme.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 58,
+      "product_id": 8,
+      "rating": 2,
+      "comment": "El micrófono recoge mucho ruido en la calle.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 59,
+      "product_id": 8,
+      "rating": 2,
+      "comment": "En llamadas exteriores no me escuchan con claridad.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 60,
+      "product_id": 8,
+      "rating": 4,
+      "comment": "Son cómodos durante sesiones cortas.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 61,
+      "product_id": 8,
+      "rating": 3,
+      "comment": "Después de varias horas noto presión y molestia.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 62,
+      "product_id": 8,
+      "rating": 5,
+      "comment": "La batería dura varios días con mi uso.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 63,
+      "product_id": 8,
+      "rating": 4,
+      "comment": "La conexión con mi teléfono es estable.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 64,
+      "product_id": 8,
+      "rating": 3,
+      "comment": "El sonido es claro, pero el precio es elevado.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 65,
+      "product_id": 9,
+      "rating": 5,
+      "comment": "La cancelación de ruido ayuda a concentrarme.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 66,
+      "product_id": 9,
+      "rating": 2,
+      "comment": "El micrófono recoge mucho ruido en la calle.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 67,
+      "product_id": 9,
+      "rating": 2,
+      "comment": "En llamadas exteriores no me escuchan con claridad.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 68,
+      "product_id": 9,
+      "rating": 4,
+      "comment": "Son cómodos durante sesiones cortas.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 69,
+      "product_id": 9,
+      "rating": 3,
+      "comment": "Después de varias horas noto presión y molestia.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 70,
+      "product_id": 9,
+      "rating": 5,
+      "comment": "La batería dura varios días con mi uso.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 71,
+      "product_id": 9,
+      "rating": 4,
+      "comment": "La conexión con mi teléfono es estable.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 72,
+      "product_id": 9,
+      "rating": 3,
+      "comment": "El sonido es claro, pero el precio es elevado.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 73,
+      "product_id": 10,
+      "rating": 5,
+      "comment": "Es cómoda para leer y tomar notas.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 74,
+      "product_id": 10,
+      "rating": 2,
+      "comment": "La multitarea se vuelve lenta con varias aplicaciones.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 75,
+      "product_id": 10,
+      "rating": 3,
+      "comment": "Con muchas pestañas abiertas noto lentitud.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 76,
+      "product_id": 10,
+      "rating": 4,
+      "comment": "La pantalla es adecuada para películas y clases.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 77,
+      "product_id": 10,
+      "rating": 3,
+      "comment": "El teclado se vende por separado y aumenta el costo.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 78,
+      "product_id": 10,
+      "rating": 5,
+      "comment": "La batería dura una jornada de estudio.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 79,
+      "product_id": 10,
+      "rating": 4,
+      "comment": "Para documentos básicos funciona bien.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 80,
+      "product_id": 10,
+      "rating": 3,
+      "comment": "Me gustaría más almacenamiento para archivos sin conexión.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 81,
+      "product_id": 11,
+      "rating": 5,
+      "comment": "Es cómoda para leer y tomar notas.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 82,
+      "product_id": 11,
+      "rating": 2,
+      "comment": "La multitarea se vuelve lenta con varias aplicaciones.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 83,
+      "product_id": 11,
+      "rating": 3,
+      "comment": "Con muchas pestañas abiertas noto lentitud.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 84,
+      "product_id": 11,
+      "rating": 4,
+      "comment": "La pantalla es adecuada para películas y clases.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 85,
+      "product_id": 11,
+      "rating": 3,
+      "comment": "El teclado se vende por separado y aumenta el costo.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 86,
+      "product_id": 11,
+      "rating": 5,
+      "comment": "La batería dura una jornada de estudio.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 87,
+      "product_id": 11,
+      "rating": 4,
+      "comment": "Para documentos básicos funciona bien.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 88,
+      "product_id": 11,
+      "rating": 3,
+      "comment": "Me gustaría más almacenamiento para archivos sin conexión.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 89,
+      "product_id": 12,
+      "rating": 5,
+      "comment": "Es cómoda para leer y tomar notas.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 90,
+      "product_id": 12,
+      "rating": 2,
+      "comment": "La multitarea se vuelve lenta con varias aplicaciones.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 91,
+      "product_id": 12,
+      "rating": 3,
+      "comment": "Con muchas pestañas abiertas noto lentitud.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 92,
+      "product_id": 12,
+      "rating": 4,
+      "comment": "La pantalla es adecuada para películas y clases.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 93,
+      "product_id": 12,
+      "rating": 3,
+      "comment": "El teclado se vende por separado y aumenta el costo.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 94,
+      "product_id": 12,
+      "rating": 5,
+      "comment": "La batería dura una jornada de estudio.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 95,
+      "product_id": 12,
+      "rating": 4,
+      "comment": "Para documentos básicos funciona bien.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    },
+    {
+      "id": 96,
+      "product_id": 12,
+      "rating": 3,
+      "comment": "Me gustaría más almacenamiento para archivos sin conexión.",
+      "source": "Demostración sintética; no describe compradores reales",
+      "is_demo": true
+    }
+  ],
+  "ai_services": [
+    {
+      "id": 1,
+      "slug": "chat",
+      "name": "Consulta el catálogo",
+      "description": "Respuestas basadas en productos y reseñas guardados, con memoria y fuentes.",
+      "enabled": true,
+      "model": "openai/gpt-oss-20b",
+      "max_output_tokens": 900,
+      "max_steps": 4
+    },
+    {
+      "id": 2,
+      "slug": "explorar",
+      "name": "Explora opiniones",
+      "description": "Busca reseñas externas y analiza sentimiento, aspectos y límites de la evidencia.",
+      "enabled": true,
+      "model": "openai/gpt-oss-20b",
+      "max_output_tokens": 900,
+      "max_steps": 4
+    },
+    {
+      "id": 3,
+      "slug": "alternativas",
+      "name": "Encuentra alternativas",
+      "description": "Detecta problemas recurrentes y compara otras opciones con fuentes.",
+      "enabled": true,
+      "model": "openai/gpt-oss-20b",
+      "max_output_tokens": 900,
+      "max_steps": 4
+    }
+  ]
+}
