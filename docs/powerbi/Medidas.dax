@@ -1,7 +1,8 @@
 // Crear estas medidas en una tabla de Power BI llamada Uso.
-Consultas = SUM(Uso[consultas])
-Tokens = SUM(Uso[tokens_total])
-Tokens entrada = SUM(Uso[tokens_entrada])
-Tokens salida = SUM(Uso[tokens_salida])
-Completadas = SUM(Uso[completadas])
-Bloqueadas = SUM(Uso[bloqueadas])
+// El prefijo "Total" evita colisiones con las columnas del mismo nombre.
+Total consultas = SUM(Uso[consultas])
+Total tokens = SUM(Uso[tokens_total])
+Tokens entrada total = SUM(Uso[tokens_entrada])
+Tokens salida total = SUM(Uso[tokens_salida])
+Total completadas = SUM(Uso[completadas])
+Total bloqueadas = SUM(Uso[bloqueadas])

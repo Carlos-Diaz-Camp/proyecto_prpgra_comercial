@@ -1,9 +1,9 @@
 // Power BI Desktop: consulta en blanco > Editor avanzado.
-// Sustituir BaseUrl por la URL HTTPS real. Configurar credenciales Basic
+// BaseUrl apunta al servicio de produccion de Criterio. Configurar credenciales Basic
 // con la cuenta de rol reporter en la ventana de credenciales de Power BI.
 // No escribir contraseñas en este archivo.
 let
-    BaseUrl = "https://TU-APLICACION.onrender.com",
+    BaseUrl = "https://criterio-7s6r.onrender.com",
     HoyGuatemala = Date.From(DateTimeZone.RemoveZone(DateTimeZone.SwitchZone(DateTimeZone.FixedUtcNow(), -6))),
     FechaDesde = Date.ToText(Date.AddDays(HoyGuatemala, -30), "yyyy-MM-dd"),
     FechaHasta = Date.ToText(HoyGuatemala, "yyyy-MM-dd"),
