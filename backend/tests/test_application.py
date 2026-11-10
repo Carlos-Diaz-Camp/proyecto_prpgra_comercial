@@ -81,6 +81,32 @@ def test_groq_retries_once_after_short_rate_limit(monkeypatch):
     assert result['usage']['total_tokens'] == 120
 
 
+def test_groq_retries_malformed_tool_generation_deterministically(monkeypatch):
+    requests = []
+    responses = iter([
+        httpx.Response(400, json={'error': {'message': 'Invalid tool call generated', 'failed_generation': {'reason': 'invalid JSON'}}}),
+        httpx.Response(200, json=completion(None, [tool('buscar_externos', {'consulta': 'phone'})])),
+    ])
+
+    def provider(request):
+        requests.append(json.loads(request.content))
+        return next(responses)
+
+    client = httpx.Client(transport=httpx.MockTransport(provider))
+    monkeypatch.setattr(ai.httpx, 'Client', lambda **_: client)
+
+    result = ai.groq_call(
+        [{'role': 'user', 'content': 'Busca opiniones'}],
+        'openai/gpt-oss-20b',
+        100,
+        [ai.TOOLS[0]],
+        required=True,
+    )
+
+    assert [request['temperature'] for request in requests] == [0.2, 0]
+    assert result['choices'][0]['message']['tool_calls'][0]['function']['name'] == 'buscar_externos'
+
+
 @pytest.mark.parametrize(('slug', 'empty_search'), [('explorar', False), ('alternativas', False), ('explorar', True)])
 def test_agents_use_external_tools_multiple_steps_and_meter_all_calls(client, monkeypatch, slug, empty_search):
     responses = iter([completion(None, [tool('buscar_externos', {'consulta': 'phone'})]), completion(None, [tool('detalle_externo', {'producto_id': 1}, 'call-2')]), completion('Opiniones de ejemplo [externo:1].')])

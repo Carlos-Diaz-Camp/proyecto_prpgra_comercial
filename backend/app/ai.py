@@ -109,6 +109,17 @@ def groq_call(messages, model, max_tokens, tools=None, required=False):
     headers = {'Authorization': f'Bearer {settings().groq_api_key}'}
     with httpx.Client(timeout=35) as client:
         response = client.post(url, headers=headers, json=body)
+        # Groq validates model-generated tool arguments. A malformed tool call is
+        # reported as HTTP 400 with `failed_generation`; retry once with fully
+        # deterministic sampling, as recommended by the provider.
+        if response.status_code == 400 and tools:
+            try:
+                provider_error = response.json().get('error', {})
+            except (ValueError, AttributeError):
+                provider_error = {}
+            if provider_error.get('failed_generation') is not None:
+                retry_body = {**body, 'temperature': 0}
+                response = client.post(url, headers=headers, json=retry_body)
         if response.status_code == 429:
             # A rejected request did not complete inference. Keep its local reservation while retrying once.
             try:
