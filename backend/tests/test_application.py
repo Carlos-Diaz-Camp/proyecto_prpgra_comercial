@@ -65,20 +65,24 @@ def test_no_evidence_does_not_invent_or_call_provider(client, monkeypatch):
     assert result.json()['usage']['total_tokens'] == 0
 
 
-@pytest.mark.parametrize('slug', ['explorar', 'alternativas'])
-def test_agents_use_external_tools_multiple_steps_and_meter_all_calls(client, monkeypatch, slug):
+@pytest.mark.parametrize(('slug', 'empty_search'), [('explorar', False), ('alternativas', False), ('explorar', True)])
+def test_agents_use_external_tools_multiple_steps_and_meter_all_calls(client, monkeypatch, slug, empty_search):
     responses = iter([completion(None, [tool('buscar_externos', {'consulta': 'phone'})]), completion(None, [tool('detalle_externo', {'producto_id': 1}, 'call-2')]), completion('Opiniones de ejemplo [externo:1].')])
     monkeypatch.setattr(ai, 'groq_call', lambda *a, **k: next(responses))
     seen = []
     def external(path, params=None):
         seen.append(path)
+        if path == '/search' and empty_search:
+            return {'products': []}, []
         return {'products': [{'id': 1, 'reviews': [{'comment': 'Good', 'rating': 4}]}]}, [{'id': 'externo:1', 'title': 'Demo', 'url': 'https://dummyjson.com/products/1', 'demo': True}]
     monkeypatch.setattr(ai, 'external', external)
     auth = login(client)
     result = client.post('/api/ia/' + slug, headers=auth, json={'question': 'Busca opiniones y alternativas', 'product_id': 1})
     assert result.status_code == 200, result.text
-    assert seen == ['/search', '/1']
+    expected_search = ['/search', '/category/smartphones'] if empty_search else ['/search']
+    assert seen == expected_search + ['/1']
     assert len(result.json()['trace']) == 2
+    assert any(source['id'] == 'externo:1' for source in result.json()['sources'])
     assert result.json()['usage']['total_tokens'] == 360
 
 

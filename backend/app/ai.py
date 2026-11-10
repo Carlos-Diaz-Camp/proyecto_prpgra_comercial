@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 from datetime import datetime, timezone
 import httpx
@@ -7,6 +8,8 @@ from sqlalchemy import select, or_, text
 from .config import settings
 from .db import SessionLocal
 from .models import User, Product, Review, UsageEvent
+
+logger = logging.getLogger(__name__)
 
 
 def source_product(p):
@@ -60,7 +63,8 @@ def external(path, params=None):
             continue
         pid = p['id']
         clean.append({k: p.get(k) for k in ('id', 'title', 'category', 'description', 'price', 'rating', 'brand')})
-        clean[-1]['reviews'] = [{'rating': r.get('rating'), 'comment': str(r.get('comment', ''))[:320]} for r in p.get('reviews', [])[:(2 if path == '/search' else 6)]]
+        review_limit = 2 if path == '/search' or path.startswith('/category/') else 6
+        clean[-1]['reviews'] = [{'rating': r.get('rating'), 'comment': str(r.get('comment', ''))[:320]} for r in p.get('reviews', [])[:review_limit]]
         sources.append({'id': f'externo:{pid}', 'title': f'DummyJSON · {p.get("title", pid)}', 'url': f'https://dummyjson.com/products/{pid}', 'demo': True, 'consulted_at': datetime.now(timezone.utc).isoformat()})
     return {'products': clean, 'notice': 'Datos ficticios de demostración; precios de ejemplo.'}, sources
 
@@ -72,12 +76,23 @@ TOOLS = [
 ]
 
 
-def execute_tool(db, name, args):
+def execute_tool(db, name, args, category=None):
     if name in ('buscar_catalogo', 'buscar_externos') and set(args) == {'consulta'} and isinstance(args['consulta'], str) and len(args['consulta']) <= 200:
         if name == 'buscar_catalogo':
             data, sources = retrieve(db, args['consulta'])
             return {'products': data}, sources
-        return external('/search', {'q': args['consulta'], 'limit': 5})
+        result, sources = external('/search', {'q': args['consulta'], 'limit': 4})
+        if sources or 'error' in result or not category or not re.fullmatch(r'[a-z0-9-]{1,64}', category):
+            return result, sources
+        result, sources = external(f'/category/{category}', {'limit': 4})
+        if sources:
+            result['scope'] = 'category'
+            result['notice'] = (
+                f'La búsqueda «{args["consulta"]}» no tuvo coincidencias. '
+                f'Estos resultados pertenecen a la categoría {category}. '
+                'Preséntalos como alternativas de demostración y atribuye cada reseña a su propio producto.'
+            )
+        return result, sources
     if name == 'detalle_externo' and set(args) == {'producto_id'} and type(args['producto_id']) is int and 1 <= args['producto_id'] <= 100000:
         return external(f'/{args["producto_id"]}')
     return {'error': 'Herramienta o argumentos inválidos.'}, []
@@ -115,7 +130,8 @@ def metered_call(user_id, request_id, service, messages, tools=None, required=Fa
             raise ValueError('invalid usage')
     except Exception as exc:
         # Explicit HTTP rejections did not complete inference. Ambiguous network errors keep a reservation.
-        rejected = isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code in (400, 401, 403, 404, 413, 422, 429)
+        upstream_status = exc.response.status_code if isinstance(exc, httpx.HTTPStatusError) else None
+        rejected = upstream_status in (400, 401, 403, 404, 413, 422, 429)
         with SessionLocal() as db:
             user = db.scalar(select(User).where(User.id == user_id).with_for_update())
             event = db.get(UsageEvent, event_id)
@@ -124,6 +140,12 @@ def metered_call(user_id, request_id, service, messages, tools=None, required=Fa
                 user.tokens_reserved -= reserve
                 event.reserved_tokens = 0
             db.commit()
+        if upstream_status is not None:
+            logger.warning('Groq devolvió HTTP %s (solicitud %s).', upstream_status, request_id)
+        if upstream_status == 429:
+            retry_after = exc.response.headers.get('Retry-After', '')
+            headers = {'Retry-After': retry_after} if retry_after.isdecimal() else None
+            raise HTTPException(503, 'Groq alcanzó su límite temporal. Espera un momento y vuelve a intentar.', headers=headers) from exc
         raise HTTPException(503, 'Groq no pudo completar la solicitud. Revisa la clave, el modelo o los límites del proveedor. Si hubo un corte de conexión, el cupo queda reservado hasta revisión.') from exc
     with SessionLocal() as db:
         user = db.scalar(select(User).where(User.id == user_id).with_for_update())
@@ -155,6 +177,7 @@ def run_ai(db, user_id, request_id, service, question, product_id, history):
         return result['content'], sources, [{'step': 1, 'tool': 'recuperacion_local', 'sources': len(sources)}]
     purpose = 'Busca reseñas externas, analiza sentimiento y aspectos, y amplía la búsqueda si faltan datos.' if service.slug == 'explorar' else 'Identifica problemas recurrentes con evidencias, busca candidatos externos y compara alternativas por características y reseñas.'
     messages[0]['content'] += '\n' + purpose + ' Debes consultar una fuente externa y usar sus resultados en al menos dos pasos de herramientas. Si no hay evidencia suficiente, decláralo.'
+    category = data[0]['category'] if data else None
     trace, external_seen = [], False
     for step in range(service.max_steps):
         available = [TOOLS[1]] if step == 0 else TOOLS
@@ -171,7 +194,7 @@ def run_ai(db, user_id, request_id, service, question, product_id, history):
                 args = json.loads(call['function']['arguments'])
                 if not isinstance(args, dict):
                     raise ValueError()
-                value, new_sources = execute_tool(db, name, args)
+                value, new_sources = execute_tool(db, name, args, category)
             except (ValueError, KeyError, TypeError):
                 value, new_sources = {'error': 'Argumentos de herramienta inválidos.'}, []
             external_seen = external_seen or any(s.get('url') for s in new_sources)

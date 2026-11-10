@@ -143,7 +143,7 @@ def ask(service_slug: str, body: Ask, user: User = Depends(current_user), db: Se
         request_record.error = str(exc.detail)
         db.add(Message(conversation_id=conversation_id, role='error', content=str(exc.detail)))
         db.commit()
-        raise HTTPException(exc.status_code, {'message': exc.detail, 'conversation_id': conversation_id, 'request_id': request_id})
+        raise HTTPException(exc.status_code, {'message': exc.detail, 'conversation_id': conversation_id, 'request_id': request_id}, headers=exc.headers)
     except Exception:
         db.rollback()
         request_record = db.get(ServiceRequest, request_id)
